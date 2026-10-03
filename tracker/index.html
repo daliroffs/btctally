@@ -107,13 +107,13 @@
   <div class="tablewrap" id="btct-txs"><div class="empty">No transactions yet.</div></div>
 </div>
 
-<p class="note">Watch-only: BTC Tally never asks for private keys or seed phrases. Your addresses are saved only in this browser, and blockchain and price data are loaded straight from the public mempool.space API. Long histories are limited to the most recent 500 transactions per address. This is not financial advice.</p>
+<p class="note">Watch-only: BTC Tally never asks for private keys or seed phrases. Your addresses are saved only in this browser, and blockchain and price data are loaded straight from the public mempool.space API. Long histories are limited to the most recent ~250 transactions per address. This is not financial advice.</p>
 
 <script>
 (function(){
   var API = "https://mempool.space/api";
   var CURS = ["USD","EUR","GBP","CAD","CHF","AUD","JPY"];
-  var MAX_PAGES = 20; // 25 confirmed txs per page → 500 txs per address
+  var MAX_PAGES = 10; // 25 confirmed txs per page → ~250 txs per address
   var root = document.getElementById("btct");
   var $ = function(id){ return document.getElementById("btct-" + id); };
 
@@ -128,7 +128,8 @@
     unit: "btc",
     data: {},                               // addr -> {stats, txs, truncated}
     prices: null,                           // current prices {USD:..}
-    hist: null                              // [{t, p}] ascending, for state.cur
+    hist: null,                             // [{t, p}] ascending, for state.cur
+    failed: {}                              // addr -> true when its last load failed
   };
 
   // ---------- helpers ----------
@@ -150,21 +151,32 @@
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   function short(a){ return a.length > 18 ? a.slice(0, 9) + "…" + a.slice(-6) : a; }
   function validAddr(a){ return /^(bc1[02-9ac-hj-np-z]{11,87}|[13][1-9A-HJ-NP-Za-km-z]{25,34})$/i.test(a); }
-  function getJSON(url){
-    return fetch(url).then(function(r){
-      if (r.status === 429) throw new Error("Rate limited by mempool.space — wait a minute and refresh.");
-      if (!r.ok) throw new Error("Request failed (" + r.status + ")");
+  var BUSY_MSG = "mempool.space is busy or limiting requests. Wait a minute, then press Refresh.";
+  function getJSON(url, retried){
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = ctl && setTimeout(function(){ ctl.abort(); }, 15000);
+    return fetch(url, ctl ? {signal: ctl.signal} : undefined).then(function(r){
+      clearTimeout(timer);
+      if (r.status === 429 || r.status >= 500) throw new Error(BUSY_MSG);
+      if (!r.ok) throw new Error("Couldn't load data (error " + r.status + ").");
       return r.json();
+    }, function(){ clearTimeout(timer); throw new Error(BUSY_MSG); }).catch(function(e){
+      if (retried) throw e;
+      return new Promise(function(res){ setTimeout(res, 2000); }).then(function(){ return getJSON(url, true); });
     });
   }
   function setErr(m){ $("err").textContent = m || ""; }
 
   // ---------- data ----------
   function loadAddress(a){
-    return Promise.all([
-      getJSON(API + "/address/" + a),
-      fetchTxs(a)
-    ]).then(function(r){ state.data[a] = {stats: r[0], txs: r[1].txs, truncated: r[1].truncated}; });
+    delete state.failed[a];
+    return getJSON(API + "/address/" + a).then(function(stats){
+      var prev = state.data[a];
+      state.data[a] = {stats: stats, txs: prev ? prev.txs : [], truncated: prev ? prev.truncated : false, pending: !prev};
+      render(); // show the balance right away; history follows
+      return fetchTxs(a).then(function(r){ state.data[a] = {stats: stats, txs: r.txs, truncated: r.truncated}; },
+                              function(e){ state.data[a].pending = false; state.data[a].histFailed = true; throw e; });
+    }, function(e){ if (!state.data[a]) state.failed[a] = true; throw e; });
   }
   function fetchTxs(a){
     // First call returns mempool txs + first 25 confirmed; then page by last confirmed txid.
@@ -255,14 +267,17 @@
       var d = state.data[x.a], bal = d ? balanceOf(d.stats) : null;
       return '<div class="addr"><div class="l"><div class="name">' + esc(x.label || "Address " + (i + 1)) + '</div>' +
         '<div class="mono"><a href="https://mempool.space/address/' + esc(x.a) + '" target="_blank" rel="noopener">' + esc(x.a) + '</a></div></div>' +
-        '<div style="display:flex;align-items:center;gap:4px"><div class="bal">' + (d ? fmtBtc(bal) + '<small>' + (price ? fmtFiat(bal / SAT * price) : "") + '</small>' : '<small>Loading…</small>') + '</div>' +
+        '<div style="display:flex;align-items:center;gap:4px"><div class="bal">' + (d ? fmtBtc(bal) + '<small>' + (price ? fmtFiat(bal / SAT * price) : "") + '</small>' : state.failed[x.a] ? '<small style="color:var(--bad)">Couldn’t load · press Refresh</small>' : '<small>Loading…</small>') + '</div>' +
         '<button class="x" title="Remove" data-rm="' + i + '" aria-label="Remove address">×</button></div></div>';
     }).join("");
   }
 
   function renderTxs(rows, price){
     var el = $("txs");
-    if (!rows.length){ el.innerHTML = '<div class="empty">No transactions yet.</div>'; return; }
+    if (!rows.length){
+      var pending = state.addrs.some(function(x){ return state.data[x.a] && state.data[x.a].pending; });
+      el.innerHTML = '<div class="empty">' + (pending ? "Loading transactions…" : "No transactions yet.") + '</div>'; return;
+    }
     var shown = rows.slice(0, 100);
     el.innerHTML = '<table><thead><tr><th>Date</th><th>Type</th><th class="num">Amount</th><th class="num">Value then</th><th class="num">Value now</th><th>Address</th><th>Tx</th></tr></thead><tbody>' +
       shown.map(function(r){
@@ -281,7 +296,8 @@
   function renderChart(rows, total, truncated, any){
     var el = $("chart");
     $("ctitle").textContent = state.unit === "btc" ? "Balance over time" : "Portfolio value over time (" + state.cur + ")";
-    if (!any || !rows.length){ el.innerHTML = '<div class="empty">' + (any ? "No transactions to chart yet." : "Add an address to see your history.") + '</div>'; return; }
+    var pending = state.addrs.some(function(x){ return state.data[x.a] && state.data[x.a].pending; });
+    if (!any || !rows.length){ el.innerHTML = '<div class="empty">' + (!any ? (state.addrs.length ? "No data loaded yet. Press Refresh to try again." : "Add an address to see your history.") : pending ? "Loading history…" : "No transactions to chart yet.") + '</div>'; return; }
 
     // Walk backward from the current balance to build a step series.
     var asc = rows.slice().reverse(), bal = total, pts = [];
@@ -330,7 +346,7 @@
     var xl = "";
     for (var q = 0; q <= 4; q++){
       var tt = tMin + (tMax - tMin) * q / 4;
-      xl += '<text x="' + X(tt).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (q === 0 ? "start" : q === 4 ? "end" : "middle") + '" font-size="11" fill="var(--muted)">' + new Date(tt * 1000).toLocaleDateString(undefined, {year:"2-digit", month:"short"}) + '</text>';
+      xl += '<text x="' + X(tt).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (q === 0 ? "start" : q === 4 ? "end" : "middle") + '" font-size="11" fill="var(--muted)">' + new Date(tt * 1000).toLocaleDateString(undefined, (tMax - tMin) > 300 * 86400 ? {year:"numeric", month:"short"} : {month:"short", day:"numeric"}) + '</text>';
     }
 
     el.innerHTML =
