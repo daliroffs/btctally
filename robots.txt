@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://btctally.com/sitemap.xml

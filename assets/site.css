@@ -1,0 +1,26 @@
+:root{--bg:#ffffff;--bg2:#f7f7f8;--line:#e4e4e7;--ink:#18181b;--ink2:#52525b;--muted:#71717a;--accent:#f7931a;--accent-ink:#b45309;--on-accent:#1a1100}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--bg2:#1b1b1f;--line:#2e2e34;--ink:#f4f4f5;--ink2:#c4c4cc;--muted:#9a9aa3;--accent-ink:#fbbf6a}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+a{color:var(--accent-ink)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header.site{border-bottom:1px solid var(--line);position:sticky;top:0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);z-index:10}
+header.site .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.1rem;color:var(--ink);text-decoration:none}
+.brand svg{width:28px;height:28px}
+nav.main{display:flex;gap:4px;align-items:center}
+nav.main a{color:var(--ink2);text-decoration:none;padding:8px 10px;border-radius:8px;font-size:.95rem}
+nav.main a:hover{color:var(--ink);background:var(--bg2)}
+.btn{display:inline-block;background:var(--accent);color:var(--on-accent)!important;font-weight:650;text-decoration:none;padding:11px 20px;border-radius:10px;border:1px solid var(--accent)}
+.btn:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent;color:var(--ink)!important;border-color:var(--line);font-weight:550}
+nav.main .btn{padding:8px 14px;color:var(--on-accent)}
+@media (max-width:560px){nav.main a.hide-sm{display:none}}
+footer.site{border-top:1px solid var(--line);margin-top:48px;padding:28px 0;color:var(--muted);font-size:.88rem}
+footer.site .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer.site a{color:var(--muted)}
+.prose{max-width:720px;margin:0 auto;padding:40px 16px}
+.prose h1{font-size:2rem;line-height:1.2;margin:0 0 8px}
+.prose h2{font-size:1.2rem;margin:32px 0 8px}
+.prose p,.prose li{color:var(--ink2)}
