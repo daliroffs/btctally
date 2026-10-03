@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rules — BTC Tally</title>
+<meta name="description" content="BTC Tally community rules and how signals are scored.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=2">
+</head>
+<body>
+<main class="prose">
+<h1>Community rules</h1>
+<p>BTC Tally is a place for traders to share Bitcoin trade ideas and prove them with results. Keep it useful and honest.</p>
+<h2>How signals are scored</h2>
+<ul>
+<li><strong>Entry</strong> is locked at the live BTC-USD price (Coinbase) the moment you post.</li>
+<li>Every minute, we check 1-minute candles. If price touches your <strong>target</strong>, the signal is a <strong>hit</strong>. If it touches your <strong>stop</strong>, it's <strong>stopped out</strong>. If both are touched in the same minute, it counts as stopped, to be safe.</li>
+<li>If neither is touched in time, it <strong>expires</strong> at the market price: after 1 day (1H), 3 days (4H), 14 days (1D) or 60 days (1W).</li>
+<li><strong>Win rate</strong> = hits ÷ (hits + stops). <strong>Total return</strong> adds up the % move of every closed signal.</li>
+<li>Signals can't be edited. You can delete one only within 2 minutes of posting, for typos.</li>
+<li>Limits: 5 open signals at a time and 10 per 24 hours.</li>
+</ul>
+<h2>Do</h2>
+<ul>
+<li>Explain your reasoning: levels, setup, invalidation.</li>
+<li>Disagree with ideas, not people.</li>
+<li>Report spam, scams and abuse.</li>
+</ul>
+<h2>Don't</h2>
+<ul>
+<li>Advertise paid groups, referral links, airdrops or "guaranteed" returns.</li>
+<li>Ask anyone for money, keys, seed phrases or to DM you for "VIP signals".</li>
+<li>Impersonate other traders or create multiple accounts to vote or pad stats.</li>
+<li>Post hate, harassment or illegal content.</li>
+</ul>
+<p>Moderators may remove content or accounts that break these rules.</p>
+<h2>Not financial advice</h2>
+<p>Signals are opinions from community members. BTC Tally doesn't verify anyone's identity or credentials, and past results don't guarantee future performance. Crypto is highly volatile. Do your own research and never risk money you can't afford to lose.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>BT.initPage("/rules/");</script>
+</body>
+</html>

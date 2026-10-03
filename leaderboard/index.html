@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leaderboard — BTC Tally</title>
+<meta name="description" content="The best BTC traders on BTC Tally, ranked by verified signal results.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=2">
+</head>
+<body>
+<main class="wrap page">
+  <div class="feedbar" style="margin-top:0">
+    <div><h2 style="font-size:1.6rem">Leaderboard</h2><p class="muted" style="margin:4px 0 0">Every number here comes from signals checked against the real BTC price. Minimum 3 closed signals to rank.</p></div>
+    <div class="tabs" id="tabs"><button data-o="win_rate" class="on">Win rate</button><button data-o="total_return_pct">Total return</button><button data-o="closed">Most signals</button><button data-o="karma">Karma</button></div>
+  </div>
+  <div class="card tablewrap" id="tbl"><div class="empty">Loading…</div></div>
+  <p class="disclaimer">Past results don't guarantee future performance. Signals are community opinions, not financial advice.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>
+(function(){
+  BT.initPage("/leaderboard/");
+  var el = document.getElementById("tbl"), order = "win_rate";
+  if (!BT.configured) return BT.setupNotice(el);
+  function load(){
+    BT.sb.from("trader_stats").select("*").gte("closed", 3).order(order, {ascending: false, nullsFirst: false}).order("closed", {ascending: false}).limit(100).then(function(r){
+      if (r.error){ el.innerHTML = '<div class="empty">Couldn\'t load the leaderboard.</div>'; return; }
+      if (!r.data.length){ el.innerHTML = '<div class="empty">No ranked traders yet. Traders appear after 3 closed signals.</div>'; return; }
+      el.innerHTML = '<table class="lbt"><thead><tr><th>#</th><th>Trader</th><th class="r">Win rate</th><th class="r">Hits</th><th class="r">Stops</th><th class="r">Closed</th><th class="r">Total return</th><th class="r">Open</th><th class="r">Karma</th></tr></thead><tbody>' +
+        r.data.map(function(t, i){
+          return '<tr><td class="muted">' + (i + 1) + '</td><td><a href="/trader/?u=' + encodeURIComponent(t.username) + '">' + BT.esc(t.username) + '</a></td>' +
+            '<td class="r"><b>' + (t.win_rate == null ? "—" : Math.round(t.win_rate) + "%") + '</b></td><td class="r up">' + t.hits + '</td><td class="r down">' + t.stops + '</td><td class="r">' + t.closed + '</td>' +
+            '<td class="r ' + (t.total_return_pct >= 0 ? "up" : "down") + '">' + BT.pct(+t.total_return_pct, true) + '</td><td class="r">' + t.open + '</td><td class="r">' + t.karma + '</td></tr>';
+        }).join("") + '</tbody></table>';
+    });
+  }
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    order = b.getAttribute("data-o");
+    document.querySelectorAll("#tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>

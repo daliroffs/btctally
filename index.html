@@ -3,122 +3,148 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BTC Tally — Free Bitcoin Portfolio Tracker</title>
-<meta name="description" content="Track your Bitcoin balance, transactions and portfolio value over time. Free, watch-only, no sign-up and no private keys.">
+<title>BTC Tally — Bitcoin Trading Signals with Verified Track Records</title>
+<meta name="description" content="Live BTC chart and community Bitcoin trading signals. Every signal is tracked against the real price, so you can see which traders actually win.">
 <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
 <link rel="canonical" href="https://btctally.com/">
-<meta property="og:title" content="BTC Tally — Free Bitcoin Portfolio Tracker">
-<meta property="og:description" content="Paste a Bitcoin address, see your balance, transactions and value over time. No sign-up, no keys.">
+<meta property="og:title" content="BTC Tally — Bitcoin signals with verified track records">
+<meta property="og:description" content="Traders post BTC signals. The price decides who was right.">
 <meta property="og:url" content="https://btctally.com/">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=2">
 <style>
-.hero{padding:64px 0 40px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center}
-@media (max-width:860px){.hero{grid-template-columns:1fr;padding-top:40px}}
-.eyebrow{display:inline-block;font-size:.8rem;font-weight:600;color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 14%,transparent);padding:4px 10px;border-radius:99px;margin-bottom:16px}
-.hero h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.08;margin:0 0 16px;letter-spacing:-.02em}
-.hero p.lead{font-size:1.15rem;color:var(--ink2);margin:0 0 28px;max-width:34em}
-.cta{display:flex;gap:10px;flex-wrap:wrap}
-.trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;color:var(--muted);font-size:.9rem}
-.trust span::before{content:"✓ ";color:var(--accent-ink);font-weight:700}
-.mock{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -20px rgba(0,0,0,.25)}
-.mock .k{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.mock .v{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums}
-.mock .row{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}
-.mock svg{width:100%;height:auto;display:block}
-.mock .tx{display:flex;justify-content:space-between;font-size:.85rem;padding:8px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
-.mock .in{color:#15803d}.mock .out{color:#b91c1c}
-@media (prefers-color-scheme:dark){.mock .in{color:#4ade80}.mock .out{color:#f87171}}
-section.block{padding:48px 0}
-section.block h2{font-size:1.8rem;margin:0 0 8px;letter-spacing:-.01em}
-section.block p.sub{color:var(--ink2);margin:0 0 28px;max-width:40em}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:22px}
-.card h3{margin:10px 0 6px;font-size:1.05rem}
-.card p{margin:0;color:var(--ink2);font-size:.95rem}
-.ico{width:40px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--accent) 16%,transparent);display:grid;place-items:center;color:var(--accent-ink)}
-.ico svg{width:22px;height:22px}
-.step{display:flex;gap:14px}
-.num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:700;display:grid;place-items:center}
-.faq details{border-bottom:1px solid var(--line);padding:16px 0}
-.faq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
-.faq summary::after{content:"+";color:var(--muted);font-weight:400;font-size:1.3rem;line-height:1}
-.faq details[open] summary::after{content:"−"}
-.faq summary::-webkit-details-marker{display:none}
-.faq details p{color:var(--ink2);margin:10px 0 0}
-.final{text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:48px 20px}
-.final h2{margin:0 0 10px}
-.final p{color:var(--ink2);margin:0 0 24px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.hero h1{margin:0;font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:-.01em;line-height:1.2}
+.hero p{margin:4px 0 0;color:var(--ink2)}
+.tfbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tfbar button{border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:.88rem}
+.tfbar button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 </style>
 </head>
 <body>
-<header class="site"><div class="wrap">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="28" height="28">BTC Tally</a>
-  <nav class="main"><a class="hide-sm" href="#features">Features</a><a class="hide-sm" href="#faq">FAQ</a><a class="btn" href="/tracker/">Open tracker</a></nav>
-</div></header>
-
-<main class="wrap">
-  <section class="hero">
+<main class="wrap page">
+  <div class="hero">
     <div>
-      <span class="eyebrow">Free · Watch-only · No sign-up</span>
-      <h1>Your Bitcoin portfolio, tallied in seconds.</h1>
-      <p class="lead">Paste your Bitcoin addresses and see your total balance, every transaction, and what your stack is worth today and over time.</p>
-      <div class="cta"><a class="btn" href="/tracker/">Start tracking, free</a><a class="btn ghost" href="#how">How it works</a></div>
-      <div class="trust"><span>No private keys</span><span>No account</span><span>Data stays in your browser</span></div>
+      <h1>Bitcoin signals. Verified by the price.</h1>
+      <p>Traders post BTC calls with entry, target and stop. We track every one, so you can see who actually wins.</p>
     </div>
-    <div class="mock" aria-hidden="true">
-      <div class="row"><div><div class="k">Total balance</div><div class="v">0.4821 BTC</div></div><div style="text-align:right"><div class="k">Value</div><div class="v">$40,802</div></div></div>
-      <svg viewBox="0 0 400 140"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f7931a" stop-opacity=".3"/><stop offset="1" stop-color="#f7931a" stop-opacity="0"/></linearGradient></defs>
-        <path d="M0 120H60V104H120V96H170V70H230V78H280V48H340V30H400V140H0Z" fill="url(#g)"/>
-        <path d="M0 120H60V104H120V96H170V70H230V78H280V48H340V30H400" fill="none" stroke="#f7931a" stroke-width="2.5" stroke-linejoin="round"/></svg>
-      <div class="tx"><span>Received · Sep 28</span><span class="in">+0.0500 BTC</span></div>
-      <div class="tx"><span>Sent · Sep 14</span><span class="out">−0.0120 BTC</span></div>
-      <div class="tx"><span>Received · Aug 30</span><span class="in">+0.1000 BTC</span></div>
-    </div>
-  </section>
+  </div>
 
-  <section class="block" id="features">
-    <h2>Everything you need to know about your stack</h2>
-    <p class="sub">Simple, accurate tracking built on public blockchain data.</p>
-    <div class="grid3">
-      <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></div><h3>Transaction tracking</h3><p>Every incoming and outgoing transfer across all your addresses, with value at the time and value today.</p></div>
-      <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 16l4-5 4 3 6-8"/></svg></div><h3>Portfolio value over time</h3><p>See how your balance and its worth have changed since your first transaction, in 7 currencies.</p></div>
-      <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Private by design</h3><p>Watch-only. We never ask for keys or seed phrases, and your address list is saved only on your device.</p></div>
-    </div>
-  </section>
+  <div class="grid">
+    <div>
+      <div class="tfbar" id="tf" role="group" aria-label="Chart timeframe">
+        <button data-i="1">1m</button><button data-i="15">15m</button><button data-i="60" class="on">1H</button>
+        <button data-i="240">4H</button><button data-i="D">1D</button><button data-i="W">1W</button>
+      </div>
+      <div class="chartbox" id="chart"></div>
 
-  <section class="block" id="how">
-    <h2>How it works</h2>
-    <p class="sub">Three steps, no sign-up.</p>
-    <div class="grid3">
-      <div class="step"><div class="num">1</div><div><h3 style="margin:4px 0 4px">Paste an address</h3><p style="margin:0;color:var(--ink2)">Copy a receiving address from your wallet (bc1…, 1… or 3…).</p></div></div>
-      <div class="step"><div class="num">2</div><div><h3 style="margin:4px 0 4px">Add the rest</h3><p style="margin:0;color:var(--ink2)">Label each one, like "Cold storage" or "Exchange withdrawals".</p></div></div>
-      <div class="step"><div class="num">3</div><div><h3 style="margin:4px 0 4px">See your tally</h3><p style="margin:0;color:var(--ink2)">Your total, history and value update every time you open the page.</p></div></div>
+      <div class="feedbar">
+        <h2>Signals</h2>
+        <div class="tabs" id="tabs">
+          <button data-t="hot" class="on">Hot</button><button data-t="new">New</button><button data-t="top">Top</button>
+          <button data-t="open">Open</button><button data-t="closed">Results</button>
+        </div>
+      </div>
+      <div class="feed" id="feed"><div class="empty">Loading signals…</div></div>
     </div>
-  </section>
 
-  <section class="block faq" id="faq">
-    <h2>Frequently asked questions</h2>
-    <details><summary>How do I track my Bitcoin balance?</summary><p>Open the tracker and paste a Bitcoin address from your wallet. BTC Tally reads its balance and transaction history from the public blockchain. Add as many addresses as you like and they're totaled together.</p></details>
-    <details><summary>Do I need to create an account?</summary><p>No. There's no sign-up and no login. Your address list is saved in your own browser, so it's there next time you visit on the same device.</p></details>
-    <details><summary>Is it safe? Will you ever ask for my keys?</summary><p>Never. BTC Tally is watch-only: it only needs public addresses, which can't be used to move funds. Never enter a private key or seed phrase into any website.</p></details>
-    <details><summary>Can I see historical value?</summary><p>Yes. Every transaction shows what it was worth on the day it happened and what it's worth now, and the chart shows your portfolio value over time.</p></details>
-    <details><summary>Where does the data come from?</summary><p>Balances and transactions come from the public Bitcoin blockchain via mempool.space, and prices from mempool.space's price feed. Your browser requests it directly.</p></details>
-    <details><summary>Does it support xpub / whole-wallet tracking?</summary><p>Not yet. For now, add individual addresses. Extended public key (xpub) support is planned.</p></details>
-  </section>
-
-  <section class="block">
-    <div class="final">
-      <h2>Ready to tally up?</h2>
-      <p>Free, private, and ready in seconds.</p>
-      <a class="btn" href="/tracker/">Open the tracker</a>
-    </div>
-  </section>
+    <aside class="side">
+      <div class="card">
+        <h3>How it works</h3>
+        <ol class="how">
+          <li>Post a long or short with a target and stop.</li>
+          <li>Your entry is locked at the live price. No edits, no deleting losers.</li>
+          <li>We check the price every minute and mark it <b>hit</b>, <b>stopped</b> or <b>expired</b>.</li>
+          <li>Your win rate is public. The best traders rise to the top.</li>
+        </ol>
+        <button class="btn block" id="cta" style="margin-top:8px">+ Post a signal</button>
+      </div>
+      <div class="card">
+        <h3>Top traders <small class="muted" style="font-weight:400">· win rate</small></h3>
+        <ol class="lb" id="lb"><li class="muted">Loading…</li></ol>
+        <a href="/leaderboard/" style="display:inline-block;margin-top:10px;font-size:.9rem">Full leaderboard →</a>
+      </div>
+      <p class="disclaimer">Signals are opinions from community members, not financial advice. Crypto is volatile. Never risk money you can't afford to lose.</p>
+    </aside>
+  </div>
 </main>
 
-<footer class="site"><div class="wrap">
-  <span>© 2026 BTC Tally. Not financial advice.</span>
-  <span><a href="/tracker/">Tracker</a> · <a href="/privacy/">Privacy</a></span>
-</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>
+(function(){
+  BT.initPage("/");
+  document.getElementById("cta").onclick = BT.openPost;
+
+  // ---------- TradingView chart ----------
+  var interval = "60";
+  try { interval = localStorage.getItem("bt:tf") || "60"; } catch(e){}
+  function drawChart(){
+    var dark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+    var box = document.getElementById("chart");
+    box.innerHTML = '<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+    var s = document.createElement("script");
+    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    s.async = true;
+    s.textContent = JSON.stringify({
+      autosize: true, symbol: "COINBASE:BTCUSD", interval: interval, timezone: "Etc/UTC",
+      theme: dark ? "dark" : "light", style: "1", locale: "en", allow_symbol_change: false,
+      hide_side_toolbar: false, calendar: false, withdateranges: true, support_host: "https://www.tradingview.com"
+    });
+    box.firstChild.appendChild(s);
+    document.querySelectorAll("#tf button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-i") === interval); });
+  }
+  document.getElementById("tf").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    interval = b.getAttribute("data-i");
+    try { localStorage.setItem("bt:tf", interval); } catch(err){}
+    drawChart();
+  });
+  drawChart();
+
+  // ---------- feed ----------
+  var tab = "hot";
+  var feed = document.getElementById("feed");
+  function load(){
+    if (!BT.configured) return BT.setupNotice(feed);
+    var q = BT.sb.from("signal_feed").select("*").limit(50);
+    var weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+    if (tab === "hot") q = q.order("hot", {ascending: false});
+    else if (tab === "new") q = q.order("created_at", {ascending: false});
+    else if (tab === "top") q = q.gte("created_at", weekAgo).order("score", {ascending: false});
+    else if (tab === "open") q = q.eq("status", "open").order("created_at", {ascending: false});
+    else q = q.neq("status", "open").order("closed_at", {ascending: false});
+    q.then(function(r){
+      if (r.error){ feed.innerHTML = '<div class="empty">Couldn\'t load signals. Try again in a moment.</div>'; return; }
+      if (!r.data.length){ feed.innerHTML = '<div class="empty">' + (tab === "closed" ? "No closed signals yet." : "No signals yet. Be the first to post one.") + '</div>'; return; }
+      feed.innerHTML = ""; r.data.forEach(function(s){ feed.appendChild(BT.signalCard(s)); });
+    });
+  }
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    tab = b.getAttribute("data-t");
+    document.querySelectorAll("#tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    load();
+  });
+
+  // ---------- top traders ----------
+  function loadLb(){
+    var el = document.getElementById("lb");
+    if (!BT.configured){ el.innerHTML = '<li class="muted">Coming soon.</li>'; return; }
+    BT.sb.from("trader_stats").select("username,win_rate,closed").gte("closed", 3)
+      .order("win_rate", {ascending: false}).order("closed", {ascending: false}).limit(8).then(function(r){
+        if (r.error || !r.data.length){ el.innerHTML = '<li class="muted">Traders appear here after 3 closed signals.</li>'; return; }
+        el.innerHTML = r.data.map(function(t, i){
+          return '<li><span class="rank">' + (i + 1) + '</span><a href="/trader/?u=' + encodeURIComponent(t.username) + '">' + BT.esc(t.username) + '</a><span class="stat">' + Math.round(t.win_rate) + '% · ' + t.closed + '</span></li>';
+        }).join("");
+      });
+  }
+
+  BT.onAuth(load);   // re-render with the viewer's votes after sign-in/out
+  load(); loadLb();
+  setInterval(function(){ if (!document.hidden) load(); }, 60000);
+})();
+</script>
 </body>
 </html>

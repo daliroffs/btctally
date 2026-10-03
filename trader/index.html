@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trader — BTC Tally</title>
+<meta name="description" content="A BTC Tally trader's verified Bitcoin signal track record.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=2">
+</head>
+<body>
+<main class="wrap page">
+  <div id="head"><div class="empty">Loading…</div></div>
+  <div class="feedbar"><h2>Signals</h2>
+    <div class="tabs" id="tabs"><button data-t="all" class="on">All</button><button data-t="open">Open</button><button data-t="closed">Closed</button></div>
+  </div>
+  <div class="feed" id="feed"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>
+(function(){
+  BT.initPage("");
+  var name = BT.qs("u") || "", head = document.getElementById("head"), feed = document.getElementById("feed");
+  var trader = null, tab = "all";
+  if (!BT.configured) return BT.setupNotice(head);
+
+  function stat(k, v){ return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'; }
+
+  BT.sb.from("trader_stats").select("*").ilike("username", name.replace(/[%_\\]/g, "\\$&")).maybeSingle().then(function(r){
+    if (r.error || !r.data){ head.innerHTML = '<div class="empty">Trader not found.</div>'; return; }
+    trader = r.data; document.title = trader.username + " — BTC Tally";
+    var mine = BT.user && BT.user.id === trader.id;
+    head.innerHTML = '<div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">' +
+      '<div><h1 style="margin:0;font-size:1.6rem">' + BT.esc(trader.username) + '</h1>' +
+      (trader.bio ? '<p style="margin:4px 0 0;color:var(--ink2)">' + BT.esc(trader.bio) + '</p>' : '') +
+      '<p class="muted" style="margin:4px 0 0;font-size:.86rem">Member since ' + new Date(trader.created_at).toLocaleDateString(undefined, {year:"numeric", month:"short"}) + '</p></div></div>' +
+      '<div class="stats4">' +
+        stat("Win rate", trader.win_rate == null ? "—" : Math.round(trader.win_rate) + "%") +
+        stat("Closed signals", trader.closed) + stat("Hits", '<span class="up">' + trader.hits + '</span>') + stat("Stops", '<span class="down">' + trader.stops + '</span>') +
+        stat("Expired", trader.expired) + stat("Open", trader.open) +
+        stat("Total return", '<span class="' + (trader.total_return_pct >= 0 ? "up" : "down") + '">' + BT.pct(+trader.total_return_pct, true) + '</span>') + stat("Karma", trader.karma) +
+      '</div><p class="disclaimer" style="margin:0">Win rate = hits ÷ (hits + stops). Total return adds up the % move of every closed signal. Expired signals count at their closing price.</p></div>';
+    load();
+  });
+
+  function load(){
+    var q = BT.sb.from("signal_feed").select("*").eq("author", trader.id).order("created_at", {ascending: false}).limit(100);
+    if (tab === "open") q = q.eq("status", "open"); else if (tab === "closed") q = q.neq("status", "open");
+    q.then(function(r){
+      if (r.error){ feed.innerHTML = '<div class="empty">Couldn\'t load signals.</div>'; return; }
+      if (!r.data.length){ feed.innerHTML = '<div class="empty">No signals here yet.</div>'; return; }
+      feed.innerHTML = ""; r.data.forEach(function(s){ feed.appendChild(BT.signalCard(s)); });
+    });
+  }
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b || !trader) return;
+    tab = b.getAttribute("data-t");
+    document.querySelectorAll("#tabs button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    load();
+  });
+  BT.onAuth(function(){ if (trader) load(); });
+})();
+</script>
+</body>
+</html>

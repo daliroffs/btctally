@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signal — BTC Tally</title>
+<meta name="description" content="A community Bitcoin trading signal on BTC Tally, tracked against the live price.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=2">
+<style>
+.prog{margin:16px 0 4px}
+.prog .bar{position:relative;height:10px;border-radius:99px;background:linear-gradient(90deg,var(--short-bg),var(--bg3) 50%,var(--long-bg))}
+.prog .mk{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+.prog .ent{position:absolute;top:-3px;width:2px;height:16px;background:var(--muted);transform:translateX(-50%)}
+.prog .lbl{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums}
+.actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.actions .vote{flex-direction:row;gap:6px}
+.minichart{height:380px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+</style>
+</head>
+<body>
+<main class="wrap page">
+  <div class="grid">
+    <div id="main"><div class="empty">Loading…</div></div>
+    <aside class="side" id="side"></aside>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>
+(function(){
+  BT.initPage("/");
+  var id = parseInt(BT.qs("id"), 10);
+  var main = document.getElementById("main"), side = document.getElementById("side");
+  var sig = null;
+  if (!BT.configured) return BT.setupNotice(main);
+  if (!id) { main.innerHTML = '<div class="empty">Signal not found.</div>'; return; }
+
+  function load(){
+    BT.sb.from("signal_feed").select("*").eq("id", id).maybeSingle().then(function(r){
+      if (r.error || !r.data){ main.innerHTML = '<div class="empty">Signal not found. It may have been removed.</div>'; return; }
+      sig = r.data; render(); loadComments(); loadAuthor();
+    });
+  }
+
+  function render(){
+    var s = sig, L = BT.levels(s), my = BT.myVotes[s.id] || 0, res = BT.result(s);
+    document.title = s.title + " — BTC Tally";
+    var mine = BT.user && BT.user.id === s.author, fresh = Date.now() - new Date(s.created_at) < 115000;
+    main.innerHTML =
+      '<div class="card detail">' +
+        '<div class="sig" style="all:unset;display:block"><div class="top" style="display:flex;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);align-items:center">' +
+          '<span class="pill ' + s.direction + '">' + (s.direction === "long" ? "▲ Long" : "▼ Short") + '</span><span class="pill tf">' + s.timeframe.toUpperCase() + '</span>' + BT.statusPill(s) +
+          '<span>by <a style="color:var(--ink2);font-weight:600" href="/trader/?u=' + encodeURIComponent(s.username) + '">' + BT.esc(s.username) + '</a></span>' + BT.authorBadge(s) +
+          '<span>· ' + new Date(s.created_at).toLocaleString() + '</span></div></div>' +
+        '<h1>' + BT.esc(s.title) + '</h1>' +
+        '<div class="stats4">' +
+          stat("Entry", BT.usd(s.entry, 2)) +
+          stat("Target", BT.usd(s.target, 2) + ' <small class="' + (L.tp >= 0 ? "up" : "down") + '">' + BT.pct(L.tp, true) + '</small>') +
+          stat("Stop", BT.usd(s.stop, 2) + ' <small class="' + (L.sp >= 0 ? "up" : "down") + '">' + BT.pct(L.sp, true) + '</small>') +
+          stat("Reward : risk", L.rr.toFixed(2)) +
+          (s.status === "open" ? stat("Expires", BT.until(s.expires_at)) : stat("Result", '<span class="' + (res >= 0 ? "up" : "down") + '">' + BT.pct(res, true) + '</span>')) +
+        '</div>' +
+        '<div class="prog" id="prog"></div>' +
+        (s.body ? '<div class="body">' + BT.esc(s.body) + '</div>' : '') +
+        '<div class="actions"><div class="vote"><button class="upv' + (my === 1 ? " on" : "") + '" aria-label="Upvote">▲</button><span class="score">' + s.score + '</span><button class="dnv' + (my === -1 ? " on" : "") + '" aria-label="Downvote">▼</button></div>' +
+          '<button class="linkbtn" id="share">Copy link</button><button class="linkbtn" id="rep">Report</button>' +
+          (mine && fresh ? '<button class="linkbtn" id="del" style="color:var(--short)">Delete (2-minute window)</button>' : '') + '</div>' +
+      '</div>' +
+      '<div class="minichart" id="mini"></div>' +
+      '<div class="card" style="margin-top:16px" id="comments"><h3>Comments</h3>' +
+        '<form id="cf"><textarea class="in" name="c" maxlength="2000" required placeholder="Add to the discussion. Be specific, be civil."></textarea><p class="err" id="cerr"></p><button class="btn sm">Comment</button></form>' +
+        '<div class="comments" id="clist"></div></div>';
+
+    BT.bindVotes(main, s);
+    progress();
+    main.querySelector("#share").onclick = function(){ navigator.clipboard && navigator.clipboard.writeText(location.href).then(function(){ BT.toast("Link copied"); }); };
+    main.querySelector("#rep").onclick = function(){ BT.report({signal_id: s.id}); };
+    var del = main.querySelector("#del");
+    if (del) del.onclick = function(){
+      BT.sb.from("signals").delete().eq("id", s.id).select().then(function(r){
+        if (r.error || !r.data.length) return BT.toast("The delete window has passed.");
+        location.href = "/";
+      });
+    };
+    var cf = main.querySelector("#cf");
+    cf.onsubmit = function(e){
+      e.preventDefault();
+      if (!BT.requireAuth()) return;
+      var btn = cf.querySelector("button"); btn.disabled = true;
+      BT.sb.from("comments").insert({signal_id: s.id, author: BT.user.id, body: cf.c.value.trim()}).then(function(r){
+        btn.disabled = false;
+        if (r.error) return cf.querySelector("#cerr").textContent = /row-level/i.test(r.error.message) ? "You're commenting too fast. Wait a minute." : BT.errMsg(r.error);
+        cf.reset(); cf.querySelector("#cerr").textContent = ""; loadComments();
+      });
+    };
+    miniChart();
+  }
+  function stat(k, v){ return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'; }
+
+  // where the price sits between stop and target
+  function progress(){
+    var el = document.getElementById("prog"); if (!el || !sig) return;
+    var s = sig, lo = Math.min(+s.stop, +s.target), hi = Math.max(+s.stop, +s.target);
+    var p = s.status === "open" ? BT.price : +s.closed_price;
+    if (!p){ el.innerHTML = ""; return; }
+    var pos = function(v){ return Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100)); };
+    var leftLabel = s.direction === "long" ? "Stop " + BT.usd(s.stop) : "Target " + BT.usd(s.target);
+    var rightLabel = s.direction === "long" ? "Target " + BT.usd(s.target) : "Stop " + BT.usd(s.stop);
+    var barBg = s.direction === "long" ? "" : "background:linear-gradient(90deg,var(--long-bg),var(--bg3) 50%,var(--short-bg))";
+    el.innerHTML = '<div class="bar" style="' + barBg + '"><div class="ent" style="left:' + pos(+s.entry) + '%" title="Entry"></div><div class="mk" style="left:' + pos(p) + '%" title="Price"></div></div>' +
+      '<div class="lbl"><span>' + leftLabel + '</span><span>' + (s.status === "open" ? "Now " : "Closed ") + BT.usd(p) + '</span><span>' + rightLabel + '</span></div>';
+  }
+  document.addEventListener("bt:price", progress);
+
+  function miniChart(){
+    var map = {"1h": "15", "4h": "60", "1d": "240", "1w": "D"};
+    var dark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+    var box = document.getElementById("mini");
+    box.innerHTML = '<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+    var sc = document.createElement("script");
+    sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"; sc.async = true;
+    sc.textContent = JSON.stringify({autosize: true, symbol: "COINBASE:BTCUSD", interval: map[sig.timeframe] || "60", timezone: "Etc/UTC",
+      theme: dark ? "dark" : "light", style: "1", locale: "en", allow_symbol_change: false, hide_side_toolbar: true, calendar: false, support_host: "https://www.tradingview.com"});
+    box.firstChild.appendChild(sc);
+  }
+
+  function loadComments(){
+    BT.sb.from("comments").select("id,body,created_at,author,profiles(username)").eq("signal_id", id).order("created_at").then(function(r){
+      var el = document.getElementById("clist"); if (!el) return;
+      if (r.error){ el.innerHTML = '<p class="muted">Couldn\'t load comments.</p>'; return; }
+      if (!r.data.length){ el.innerHTML = '<p class="muted">No comments yet.</p>'; return; }
+      el.innerHTML = r.data.map(function(c){
+        var name = c.profiles ? c.profiles.username : "deleted";
+        var own = BT.user && BT.user.id === c.author;
+        return '<div class="cmt"><div class="who"><a href="/trader/?u=' + encodeURIComponent(name) + '">' + BT.esc(name) + '</a> · ' + BT.ago(c.created_at) +
+          ' · <button class="linkbtn" data-rep="' + c.id + '">report</button>' + (own ? ' · <button class="linkbtn" data-del="' + c.id + '">delete</button>' : '') + '</div><p>' + BT.esc(c.body) + '</p></div>';
+      }).join("");
+      el.querySelectorAll("[data-rep]").forEach(function(b){ b.onclick = function(){ BT.report({comment_id: +b.getAttribute("data-rep")}); }; });
+      el.querySelectorAll("[data-del]").forEach(function(b){ b.onclick = function(){ BT.sb.from("comments").delete().eq("id", +b.getAttribute("data-del")).then(loadComments); }; });
+    });
+  }
+
+  function loadAuthor(){
+    BT.sb.from("trader_stats").select("*").eq("id", sig.author).maybeSingle().then(function(r){
+      var t = r.data; if (!t) return;
+      side.innerHTML = '<div class="card"><h3>About the trader</h3>' +
+        '<a href="/trader/?u=' + encodeURIComponent(t.username) + '" style="font-weight:700;font-size:1.05rem;color:var(--ink);text-decoration:none">' + BT.esc(t.username) + '</a>' +
+        (t.bio ? '<p class="muted" style="margin:6px 0 0">' + BT.esc(t.bio) + '</p>' : '') +
+        '<div class="stats4" style="grid-template-columns:1fr 1fr">' +
+          stat("Win rate", t.win_rate == null ? "—" : Math.round(t.win_rate) + "%") + stat("Closed", t.closed) +
+          stat("Hits / stops", t.hits + " / " + t.stops) + stat("Total return", '<span class="' + (t.total_return_pct >= 0 ? "up" : "down") + '">' + BT.pct(+t.total_return_pct, true) + '</span>') +
+        '</div><a href="/trader/?u=' + encodeURIComponent(t.username) + '">All signals →</a></div>' +
+        '<p class="disclaimer">Past results don\'t guarantee future performance. Not financial advice.</p>';
+    });
+  }
+
+  BT.onAuth(function(){ if (sig) render(), loadComments(); });
+  load();
+})();
+</script>
+</body>
+</html>

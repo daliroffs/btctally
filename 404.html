@@ -6,21 +6,17 @@
 <title>Page not found — BTC Tally</title>
 <meta name="description" content="Page not found.">
 <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=2">
 </head>
 <body>
-<header class="site"><div class="wrap">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="28" height="28">BTC Tally</a>
-  <nav class="main"><a class="hide-sm" href="/#faq">FAQ</a><a href="/privacy/">Privacy</a><a class="btn" href="/tracker/">Open tracker</a></nav>
-</div></header>
 <main class="prose" style="text-align:center;padding-top:80px">
 <h1>Page not found</h1>
 <p>That page doesn't exist.</p>
-<p><a class="btn" href="/">Go home</a> <a class="btn ghost" href="/tracker/">Open tracker</a></p>
+<p><a class="btn" href="/">See the latest signals</a></p>
 </main>
-<footer class="site"><div class="wrap">
-  <span>© 2026 BTC Tally. Not financial advice.</span>
-  <span><a href="/tracker/">Tracker</a> · <a href="/privacy/">Privacy</a></span>
-</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=2"></script>
+<script src="/assets/app.js?v=2"></script>
+<script>BT.initPage("");</script>
 </body>
 </html>
