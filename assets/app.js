@@ -113,7 +113,8 @@
   function renderAuth(){
     var box = document.getElementById("bt-auth"); if (!box) return;
     if (BT.user && BT.profile){
-      box.innerHTML = '<button class="btn sm" id="bt-post">+ Post signal</button>' +
+      box.innerHTML = (BT.profile.is_admin ? '<a class="userlink" href="/mod/" title="Moderation">🛡 Mod</a>' : '') +
+        '<button class="btn sm" id="bt-post">+ Post signal</button>' +
         '<a class="userlink" href="/trader/?u=' + encodeURIComponent(BT.profile.username) + '">' + BT.esc(BT.profile.username) + '</a>' +
         '<button class="btn ghost sm" id="bt-out">Sign out</button>';
       box.querySelector("#bt-post").onclick = BT.openPost;

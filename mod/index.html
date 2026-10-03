@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moderation — BTC Tally</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=3">
+</head>
+<body>
+<main class="wrap page">
+  <div class="feedbar" style="margin-top:0"><div><h2 style="font-size:1.6rem">Moderation</h2>
+    <p class="muted" style="margin:4px 0 0">Reports from the community, newest first. Removing a signal also removes its votes and comments.</p></div>
+    <button class="btn ghost sm" id="reload">Refresh</button></div>
+  <div id="list"><div class="empty">Loading…</div></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/config.js?v=3"></script>
+<script src="/assets/app.js?v=3"></script>
+<script>
+(function(){
+  BT.initPage("/mod/");
+  var list = document.getElementById("list");
+  if (!BT.configured) return BT.setupNotice(list);
+
+  function load(){
+    if (!BT.user){ list.innerHTML = '<div class="empty">Sign in with a moderator account to see reports.</div>'; return; }
+    if (!BT.profile || !BT.profile.is_admin){ list.innerHTML = '<div class="empty">This page is for moderators only.</div>'; return; }
+    BT.sb.from("reports")
+      .select("id,reason,created_at,signal_id,comment_id,reporter:profiles!reports_reporter_fkey(username),signal:signals(id,title,author),comment:comments(id,body,signal_id,author)")
+      .order("created_at", {ascending: false}).limit(200).then(function(r){
+        if (r.error){ list.innerHTML = '<div class="empty">Couldn\'t load reports: ' + BT.esc(BT.errMsg(r.error)) + '</div>'; return; }
+        if (!r.data.length){ list.innerHTML = '<div class="empty">No reports. All quiet.</div>'; return; }
+        list.innerHTML = '<div class="feed">' + r.data.map(function(x){
+          var what, link, action;
+          if (x.comment){
+            what = 'Comment: “' + BT.esc(x.comment.body.slice(0, 280)) + '”';
+            link = '/signal/?id=' + x.comment.signal_id + '#comments';
+            action = '<button class="btn ghost sm" data-del-comment="' + x.comment.id + '">Remove comment</button>';
+          } else if (x.signal){
+            what = 'Signal: ' + BT.esc(x.signal.title);
+            link = '/signal/?id=' + x.signal.id;
+            action = '<button class="btn ghost sm" data-del-signal="' + x.signal.id + '">Remove signal</button>';
+          } else {
+            what = '<span class="muted">Already removed</span>'; link = null; action = '';
+          }
+          return '<div class="card"><div class="muted" style="font-size:.84rem">Reported by ' + BT.esc(x.reporter ? x.reporter.username : "?") + ' · ' + BT.ago(x.created_at) + '</div>' +
+            '<p style="margin:6px 0"><b>Reason:</b> ' + BT.esc(x.reason) + '</p><p style="margin:6px 0">' + what + '</p>' +
+            '<div style="display:flex;gap:8px;flex-wrap:wrap">' + (link ? '<a class="btn ghost sm" href="' + link + '" target="_blank">Open</a>' : '') + action +
+            '<button class="btn ghost sm" data-dismiss="' + x.id + '">Dismiss report</button></div></div>';
+        }).join("") + '</div>';
+      });
+  }
+
+  list.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    var q;
+    if (b.dataset.delSignal) q = BT.sb.from("signals").delete().eq("id", +b.dataset.delSignal);
+    else if (b.dataset.delComment) q = BT.sb.from("comments").delete().eq("id", +b.dataset.delComment);
+    else if (b.dataset.dismiss) q = BT.sb.from("reports").delete().eq("id", +b.dataset.dismiss);
+    if (!q) return;
+    b.disabled = true;
+    q.select().then(function(r){
+      if (r.error) return BT.toast(BT.errMsg(r.error));
+      if (!r.data.length) return BT.toast("Nothing changed. Check that you're a moderator.");
+      BT.toast("Done"); load();
+    });
+  });
+  document.getElementById("reload").onclick = load;
+  BT.onAuth(load);
+  load();
+})();
+</script>
+</body>
+</html>
