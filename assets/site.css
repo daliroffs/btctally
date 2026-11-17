@@ -27,6 +27,7 @@ nav.main a:hover,nav.main a.on{color:var(--ink);background:var(--bg2)}
 .userlink{color:var(--ink);text-decoration:none;font-weight:600;font-size:.93rem}
 @media (max-width:760px){nav.main{display:none} .ticker small{display:none}}
 @media (max-width:480px){.ticker{display:none} .authbox{margin-left:auto}}
+@media (max-width:360px){header.site .wrap{gap:8px;padding:0 12px} .brand{font-size:1rem} .authbox{gap:6px} .authbox .btn.sm{padding:6px 9px}}
 
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:var(--on-accent);font-weight:650;text-decoration:none;padding:9px 16px;border-radius:10px;border:1px solid var(--accent);cursor:pointer;line-height:1.2}

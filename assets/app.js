@@ -55,7 +55,7 @@
   BT.onAuth = function(fn){ BT.listeners.push(fn); };
 
   // ---------- header / footer ----------
-  var NAV = [["/", "Signals"], ["/leaderboard/", "Leaderboard"], ["/rules/", "Rules"]];
+  var NAV = [["/", "Signals"], ["/leaderboard/", "Leaderboard"], ["/school/", "School"], ["/rules/", "Rules"]];
   BT.initPage = function(active){
     var h = document.createElement("header"); h.className = "site";
     h.innerHTML = '<div class="wrap">' +
@@ -67,7 +67,7 @@
 
     var f = document.createElement("footer"); f.className = "site";
     f.innerHTML = '<div class="wrap"><span>© 2026 BTC Tally · Signals are community opinions, not financial advice.</span>' +
-      '<span><a href="/rules/">Rules</a> · <a href="/privacy/">Privacy</a></span></div>';
+      '<span><a href="/school/">Trading School</a> · <a href="/rules/">Rules</a> ·<a href="/privacy/">Privacy</a></span></div>';
     document.body.appendChild(f);
 
     startTicker();
