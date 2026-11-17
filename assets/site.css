@@ -148,3 +148,23 @@ footer.site a{color:var(--muted)}
 .prose h1{font-size:1.9rem;line-height:1.2;margin:0 0 8px}
 .prose h2{font-size:1.15rem;margin:28px 0 8px}
 .prose p,.prose li{color:var(--ink2)}
+
+/* Hypr AI signals (home page) */
+.hypr{margin-top:22px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.hypr>.empty{border:0;padding:20px 10px}
+.hy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hy-head h2{margin:0;font-size:1.25rem;display:flex;align-items:center;gap:8px}
+.hy-head p{margin:4px 0 0;font-size:.9rem;max-width:60ch}
+.hy-live{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--long);background:var(--long-bg);padding:2px 8px;border-radius:99px}
+.hy-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.hy-tiles div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.hy-tiles small{display:block;color:var(--muted);font-size:.76rem}
+.hy-tiles b{font-size:1.2rem}
+.hy-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.hy-list li{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,2fr) auto;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.9rem}
+.hy-coin{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hy-lv{color:var(--ink2);font-size:.85rem}
+.hy-lv em{font-style:normal;color:var(--muted);margin-left:6px}
+.hy-lv em:first-child{margin-left:0}
+.hy-res{display:flex;align-items:center;gap:8px;justify-content:flex-end;white-space:nowrap}
+@media (max-width:640px){.hy-tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .hy-list li{grid-template-columns:1fr auto} .hy-lv{grid-column:1/-1;grid-row:2}}

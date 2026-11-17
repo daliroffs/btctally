@@ -11,7 +11,7 @@
 <meta property="og:description" content="Traders post BTC signals. The price decides who was right.">
 <meta property="og:url" content="https://btctally.com/">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="/assets/site.css?v=3">
+<link rel="stylesheet" href="/assets/site.css?v=4">
 <style>
 .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .hero h1{margin:0;font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:-.01em;line-height:1.2}
@@ -38,8 +38,10 @@
       </div>
       <div class="chartbox" id="chart"></div>
 
+      <section class="hypr" id="hypr" aria-label="AI signals"><div class="empty">Loading AI signals…</div></section>
+
       <div class="feedbar">
-        <h2>Signals</h2>
+        <h2>Community signals</h2>
         <div class="tabs" id="tabs">
           <button data-t="hot" class="on">Hot</button><button data-t="new">New</button><button data-t="top">Top</button>
           <button data-t="open">Open</button><button data-t="closed">Results</button>
@@ -71,7 +73,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/assets/config.js?v=3"></script>
-<script src="/assets/app.js?v=3"></script>
+<script src="/assets/app.js?v=4"></script>
+<script src="/assets/hypr.js?v=1" defer></script>
 <script>
 (function(){
   BT.initPage("/");

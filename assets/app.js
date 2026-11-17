@@ -72,10 +72,19 @@
 
     startTicker();
     renderAuth();
+    countVisit();
     if (!configured) return;
     sb.auth.onAuthStateChange(function(_ev, session){ setUser(session ? session.user : null); });
     sb.auth.getSession().then(function(r){ setUser(r.data.session ? r.data.session.user : null); });
   };
+
+  // One anonymous page view to our own counter (no cookie; see /privacy/). Never blocks or breaks the page.
+  function countVisit(){
+    try {
+      fetch("https://hypr.169-58-87-10.sslip.io/api/public/hit", {method: "POST", keepalive: true,
+        headers: {"Content-Type": "application/json"}, body: JSON.stringify({path: location.pathname})}).catch(function(){});
+    } catch(e){}
+  }
 
   function startTicker(){
     function tick(){

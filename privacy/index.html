@@ -6,12 +6,12 @@
 <title>Privacy — BTC Tally</title>
 <meta name="description" content="How BTC Tally handles your data.">
 <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/site.css?v=3">
+<link rel="stylesheet" href="/assets/site.css?v=4">
 </head>
 <body>
 <main class="prose">
 <h1>Privacy</h1>
-<p>Last updated: October 3, 2026</p>
+<p>Last updated: November 17, 2026</p>
 <h2>What we store</h2>
 <ul>
 <li><strong>Account:</strong> when you sign in with GitHub or Google, we receive your email address and a user ID from that provider. We never see your password.</li>
@@ -23,15 +23,17 @@
 <ul>
 <li>The chart is provided by TradingView and loads from their servers.</li>
 <li>Live prices load from the public Coinbase Exchange API.</li>
+<li>The AI signals feed loads from the Hypr signal service, which we also run.</li>
 </ul>
-<h2>Your choices</h2>
+<h2>Visit counting</h2>
+<p>We count how many people visit each day. For this, each page view is sent to our own server, which keeps only a one-way daily code made from your network address and browser type. The address itself is not stored, no cookie is set, and the code changes every day, so visits cannot be linked across days or to a person.</p><h2>Your choices</h2>
 <p>You can change your trader name and bio at any time. To delete your account and all its content, contact us. Signals that were already closed are part of the public record until the account is deleted.</p>
 <h2>Never share keys</h2>
 <p>BTC Tally will never ask for private keys, seed phrases or exchange API keys.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/assets/config.js?v=3"></script>
-<script src="/assets/app.js?v=3"></script>
+<script src="/assets/app.js?v=4"></script>
 <script>BT.initPage("");</script>
 </body>
 </html>
